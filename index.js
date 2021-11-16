@@ -14,20 +14,20 @@ const loginToLinkedInFakeAccount = async () => {
     await page.type('#password', 'asdfg12345');
     await page.waitForSelector('.btn__primary--large');
     await page.click('.btn__primary--large');
-    await page.waitFor(3000);
+    await page.waitFor(10000);
 
     // const resultsFromLinkedIn = await linkedInSearchProfiles(page, 2);
     // console.log('From Shadi Function=', resultsFromLinkedIn);
-    const resultsFromGoogle = await googleSearchProfiles(page, 3)
-    console.log('From Saleh Function=', resultsFromGoogle);
+    // const resultsFromGoogle = await googleSearchProfiles(page, 3)
+    // console.log('From Saleh Function=', resultsFromGoogle);
 
     // for(const profileLink of resultsFromGoogle){
     //     console.log(`Crawling Link=${profileLink}`);
     //     const dataResultObj = await GetDataFromSpecificProfile(browser, page, profileLink);
     //     console.log('dataResultObj=',dataResultObj);
     // }
-        console.log(`Crawling Link=${resultsFromGoogle[0]}`);
-        const dataResultObj = await GetDataFromSpecificProfile(browser, page, resultsFromGoogle[0]);
+        // console.log(`Crawling Link=${resultsFromGoogle[0]}`);
+        const dataResultObj = await GetDataFromSpecificProfile(browser, page, `https://il.linkedin.com/in/isaac-goldenberg-58b9b6a3`);
         console.log('dataResultObj=',dataResultObj);
     // resultsFromGoogle.forEach(async (profileLink,index) => {
     //     console.log(`Crawling Link=${profileLink} with index=${index}`);
@@ -46,42 +46,79 @@ const GetDataFromSpecificProfile = async (browser, page, profile) => {
     //get all page html so we can scrape it using cheerio
     await page.waitForSelector('.pb2.pv-text-details__left-panel a.link-without-visited-state')
     await page.click('.pb2.pv-text-details__left-panel a.link-without-visited-state')
-    let data = await page.content();
-    let $ = cheerio.load(data)
-    //grab name
-    const personName = $('.text-heading-xlarge').text().trim();
-    console.log('personName=', personName);
-    //grab location
-    let location = ''
-    $('.pb2.pv-text-details__left-panel').each((i, element) => {
-        location = $(element).find('.text-body-small.inline.t-black--light.break-words').text().trim();
-        console.log('location=', location);
+
+    const puppeteerData = await page.evaluate(() => {
+        const personName = document.querySelector('.text-heading-xlarge').innerText.trim();
+        const location = document.querySelector('.pb2.pv-text-details__left-panel .text-body-small').innerText.trim();
+        const listOfLinksSelectors = document.querySelectorAll('section.pv-contact-info__contact-type');
+        console.log(document.querySelectorAll('section.pv-contact-info__contact-type'));
+        const profileLink = null;
+        const email = null;
+        Array.from(listOfLinksSelectors).map((section)=>{
+            if(section.classList[1] === 'ci-vanity-url'){
+                profileLink = section.lastElementChild.firstElementChild.innerText.trim();
+            }
+            if(section.classList[1]==='ci-email'){
+                email = section.lastElementChild.firstElementChild.innerText.trim();
+            }
+        })
+        // const profileLink = document.querySelector('.pv-contact-info__contact-type.ci-vanity-url div a').innerText;
+        // const email = document.querySelector('.pv-contact-info__contact-type.ci-email div a').innerText;
+
+        return {
+            name: personName || '',
+            location: location || '',
+            email: email || 'no-public-email-available',
+            profileLink: profileLink || '',
+        };
     })
-    let email = '';
-    let profileLink = '';
 
-    page.waitForSelector('.pv-contact-info__contact-type.ci-vanity-url').then( async ()=>{
-        const aTag = await page.$('.pv-contact-info__contact-type.ci-vanity-url .pv-contact-info__ci-container a');
-        profileLink = await page.evaluate(el => el.innerText, aTag)
-    }).catch((err)=> {return;});
+    // await browser.close();
+    return puppeteerData;
 
-    page.waitForSelector('.pv-contact-info__contact-type.ci-email').then( async ()=> {
-        const aTag = await page.$('.pv-contact-info__contact-type.ci-email .pv-contact-info__ci-container a');
-        email = await page.evaluate(el => el.innerText, aTag)
-    }).catch((err)=> {return;});
 
-    console.log('a tag text=',profileLink);
-    console.log('email=', email);
-    console.log('profileLink=', profileLink);
-    console.log('');
-    console.log('Done scraping page');
-    console.log('---------------');
-    return {
-        name: personName || '',
-        location: location || '',
-        email: email || '',
-        profileLink: profileLink || ''
-    }
+    // let data = await page.content();
+    // let $ = cheerio.load(data)
+    // //grab name
+    // const personName = $('.text-heading-xlarge').text().trim();
+    // console.log('personName=', personName);
+    // //grab location
+    // let location = ''
+    // $('.pb2.pv-text-details__left-panel').each((i, element) => {
+    //     location = $(element).find('.text-body-small.inline.t-black--light.break-words').text().trim();
+    //     console.log('location=', location);
+    // })
+    // let email = '';
+    // let profileLink = '';
+
+    // page.waitForSelector('.pv-contact-info__contact-type.ci-vanity-url').then( async ()=>{
+    //     const aTag = await page.$('.pv-contact-info__contact-type.ci-vanity-url .pv-contact-info__ci-container a');
+    //     profileLink = await page.evaluate(el => el.innerText, aTag)
+    // }).catch((err)=> {return;});
+
+    // try {
+    //     page.waitForSelector('.pv-contact-info__contact-type.ci-email').then( async ()=> {
+    //         const aTag = await page.$('.pv-contact-info__contact-type.ci-email .pv-contact-info__ci-container a');
+    //         email = await page.evaluate(el => el.innerText, aTag)
+    //     }).catch((err)=> {return;});
+    // }
+    // catch (err){
+    //     email = 'no email';
+    // }
+
+
+    // console.log('a tag text=',profileLink);
+    // console.log('email=', email);
+    // console.log('profileLink=', profileLink);
+    // console.log('');
+    // console.log('Done scraping page');
+    // console.log('---------------');
+    // return {
+    //     name: personName || '',
+    //     location: location || '',
+    //     email: email || '',
+    //     profileLink: profileLink || ''
+    // }
 }
 
 //Shadi

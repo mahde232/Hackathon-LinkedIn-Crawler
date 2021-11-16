@@ -1,7 +1,6 @@
 {
   "name": "hackathon-linkedin-crawler",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -15,5 +14,11 @@
   "bugs": {
     "url": "https://github.com/mahde232/Hackathon-LinkedIn-Crawler/issues"
   },
-  "homepage": "https://github.com/mahde232/Hackathon-LinkedIn-Crawler#readme"
+  "homepage": "https://github.com/mahde232/Hackathon-LinkedIn-Crawler#readme",
+  "description": "",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.10",
+    "puppeteer": "^11.0.0",
+    "request": "^2.88.2"
+  }
 }

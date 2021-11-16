@@ -1,5 +1,7 @@
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
+const fs = require('fs');
+
 
 const GetDataFromSpecificProfile = async () => {
     const browser = await puppeteer.launch({
@@ -51,4 +53,33 @@ const GetDataFromSpecificProfile = async () => {
     }
 }
 
+
+
+
+async function googleSearchProfiles(howManyPages) {
+    const profiles = [];
+    const browser = await puppeteer.launch({
+        headless: false,
+        defaultViewport: { width: 850, height: 1080 }
+    });          //! when running puppeteer in heroku/AWS or similar, headless shoud be set tp true
+    const page = await browser.newPage();
+    await page.goto("https://www.google.com/search?q=linkedIn+Israeli+stealth+startup");
+    for (let i = 1; i <= howManyPages; i++) {
+        let data = await page.evaluate(() => document.querySelector('*').outerHTML); //get all page html so we can scrape it using cheerio
+        let $ = cheerio.load(data)
+        $('.yuRUbf').each((i, element) => {
+            const profileUrl = $(element).find('a').attr('href');
+            if (profileUrl.substring(24).split('/')[0] === 'in')
+                profiles.push({ profile: profileUrl });
+        });
+        await page.goto(`https://www.google.com/search?q=linkedIn+Israeli+stealth+startup&start=${i * 10}`);
+    }
+
+    fs.writeFileSync('./profiles.json', JSON.stringify({ profiles: profiles }));
+    let file = JSON.parse(fs.readFileSync('profiles.json'));
+    console.log(file.profiles);
+    return profiles;
+}
+
+googleSearchProfiles(2);
 GetDataFromSpecificProfile();

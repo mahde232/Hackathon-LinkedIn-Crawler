@@ -4,12 +4,19 @@ const fs = require('fs');
 
 
 const GetDataFromSpecificProfile = async () => {
+// const request = require('request')
+
+
+async function mainUsers() {
+//! ================== shadi =============
+    const linksToVisit = [];
+    //! =============================
+
     const browser = await puppeteer.launch({
         headless: false,
         defaultViewport: { width: 1920, height: 1080 }
     });          //! when running puppeteer in heroku/AWS or similar, headless shoud be set tp true
     const page = await browser.newPage();
-
     await page.goto("https://www.linkedin.com/uas/login")
     await page.type('#username', 'jebigom876@idrct.com');
     await page.type('#password', 'asdfg12345');
@@ -53,6 +60,31 @@ const GetDataFromSpecificProfile = async () => {
     }
 }
 
+    await page.click('.btn__primary--large.from__button--floating');
+
+//! =================shadi ======================================
+   
+
+setTimeout(async () => {
+    await page.goto('https://www.linkedin.com/search/results/people/?geoUrn=%5B%22101620260%22%5D&keywords=stealth%20startup&page=2')
+    const htmlContent = await page.content();
+
+    const $ = cheerio.load(htmlContent);
+    const newLinksToVisit =  $(".app-aware-link").map((index, element)=> $(element).attr("href")).get();
+    console.log(newLinksToVisit);
+}, 5000)
+
+}
+
+
+
+
+
+
+//! =============================================================
+
+
+mainUsers();
 
 
 

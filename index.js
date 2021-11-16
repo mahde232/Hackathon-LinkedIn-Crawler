@@ -3,30 +3,31 @@ const cheerio = require('cheerio');
 const request = require('request')
 
 
-async function main (){
+async function main() {
 
-    const browser = await puppeteer.launch({headless : false,
-    defaultViewport:{width : 1920, height: 1080}});          //! when running puppeteer in heroku/AWS or similar, headless shoud be set tp true
-const page = await browser.newPage();
+    const browser = await puppeteer.launch({
+        headless: false,
+        defaultViewport: { width: 1920, height: 1080 }
+    });          //! when running puppeteer in heroku/AWS or similar, headless shoud be set tp true
+    const page = await browser.newPage();
 
-await page.goto("https://www.linkedin.com/uas/login")
-await page.type('#username','kesaxo2766@incoware.com');
-await page.type('#password','123456mahdeshadi');
-await page.click('.btn__primary--large.from__button--floating');
-setTimeout( async ()=>{
-    await page.goto('https://www.linkedin.com/in/amir-torgeman-32566b226/')
-    
-    request('https://www.linkedin.com/in/amir-torgeman-32566b226/', (err, res , html)=>{
-           if(!err && res.statusCode === 200  ){
-               const $ = cheerio.load(html)
-               $('.text-body-small').each((i,element)=>{
-                    // const text = $(element).find('.text-body-small').text;
+    await page.goto("https://www.linkedin.com/uas/login")
+    await page.type('#username', 'kesaxo2766@incoware.com');
+    await page.type('#password', '123456mahdeshadi');
+    await page.click('.btn__primary--large.from__button--floating');
+    setTimeout(async () => {
+        // await page.goto('https://www.linkedin.com/in/amir-torgeman-32566b226/')
 
-                    console.log('element.text');
-               })
-           }
-    })
-},5000)
+        await request('https://www.linkedin.com/in/amir-torgeman-32566b226/', (err, res, html) => {
+            if (!err && res.statusCode === 200) {
+                const $ = cheerio.load(html)
+                console.log(html);
+                console.log($('.text-body-small'));
+                console.log($('.text-heading-xlarge'));
+            }
+            if (err) console.log("err", err);
+        })
+    }, 5000)
 }
 
 main();

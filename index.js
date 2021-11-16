@@ -32,6 +32,6 @@ setTimeout( async ()=>{
 main();
 
 
-// class="text-body-small inline t-black--light break-words"
+// class="text-body-small inline t-black--light break-words" mahde lol
 
 // text-heading-xlarge inline t-24 v-align-middle break-words

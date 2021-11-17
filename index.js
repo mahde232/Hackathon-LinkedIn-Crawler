@@ -23,10 +23,10 @@ const loginToLinkedInFakeAccount = async () => {
     console.log('From Saleh Function=', resultsFromGoogle);
 
     let arrayOfResult = [];
-    for(const profileLink of resultsFromGoogle){
+    for (const profileLink of resultsFromGoogle) {
         console.log(`Crawling Link=${profileLink}`);
         const dataResultObj = await GetDataFromSpecificProfile(page, profileLink);
-        console.log('dataResultObj=',dataResultObj);
+        console.log('dataResultObj=', dataResultObj);
         arrayOfResult.push(dataResultObj);
     }
     // resultsFromGoogle.forEach(async (profileLink,index) => {
@@ -37,30 +37,36 @@ const loginToLinkedInFakeAccount = async () => {
 
     resultsFromLinkedIn.forEach(async (profileLink) => {
         console.log(`Crawling Link=${profileLink}`);
-        const dataResultObj = await GetDataFromSpecificProfile(profileLink);
-        console.log('dataResultObj=',dataResultObj);
+        const dataResultObj = await GetDataFromSpecificProfile(page,profileLink);
+        console.log('dataResultObj=', dataResultObj);
         arrayOfResult.push(dataResultObj);
     })
+    console.log('arrayOfResult: ', arrayOfResult);
     //Save arrayOfResults to the DB using InsertMany (could be a function, could be in this code)
+    profileModel.insertMany(arrayOfResult).then(() => {
+        console.log('inserted');
+    }).catch(err => {
+        console.log(err);
+    })
 }
 
 const GetDataFromSpecificProfile = async (page, profile) => {
     await page.goto(`${profile}`, { waitUntil: 'networkidle2' });
-    //get all page html so we can scrape it using cheerio
     await page.waitForSelector('.pb2.pv-text-details__left-panel a.link-without-visited-state')
     await page.click('.pb2.pv-text-details__left-panel a.link-without-visited-state')
 
-    const puppeteerData = await page.evaluate(() => {
+    const puppeteerData = await page.evaluate((profile) => {
         const personName = document.querySelector('.text-heading-xlarge').innerText.trim();
         const location = document.querySelector('.pb2.pv-text-details__left-panel .text-body-small').innerText.trim();
+        //TODO =>
         // const email = document.querySelector('.pv-contact-info__ci-container a').innerText; //THIS SHIT DOESNT WORK, ASK FOR HELP
         return {
             name: personName || 'name-not-found',
             location: location || 'location-not-found',
             // email: email || 'no-public-email-available',
-            profileLink: profile,
         };
     })
+    puppeteerData['profileLink'] = profile;
     return puppeteerData;
 }
 
@@ -77,7 +83,7 @@ const linkedInSearchProfiles = async (page, howManyPages) => {
         let $ = cheerio.load(htmlContent);
         let newLinksToVisit = $(".app-aware-link").map((index, element) => $(element).attr("href")).get(); //get links to profiles from search
         linksArray = [...linksArray, ...newLinksToVisit];
-        
+
         console.log(`${searchQueryURL}&title=${titles[1]}`);
         await page.goto(`${searchQueryURL}&title=${titles[1]}`)
         htmlContent = await page.content();
@@ -121,6 +127,6 @@ const googleSearchProfiles = async (page, howManyPages) => {
 
 loginToLinkedInFakeAccount();
 
-mongoose.connect('mongodb+srv://mahde:asdfg12345@cluster0.tdz2o.mongodb.net/LinkedInDB?retryWrites=true&w=majority', { useNewUrlParser: true },()=>{
+mongoose.connect('mongodb+srv://mahde:asdfg12345@cluster0.tdz2o.mongodb.net/LinkedInDB?retryWrites=true&w=majority', { useNewUrlParser: true }, () => {
     console.log('connected to db');
 });

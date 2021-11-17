@@ -12,7 +12,7 @@ const profileSchema = new Schema({
     },
     email: {
         type: String,
-        required: true
+        default: 'no-email-found'
     },
     profileLink: {
         type: String,
@@ -20,7 +20,7 @@ const profileSchema = new Schema({
     }
 });
 
-const profilesModel = mongoose.model('profilesData', profileSchema);
+const profilesModel = mongoose.model('profiles', profileSchema);
 module.exports = {
     profilesModel
 };

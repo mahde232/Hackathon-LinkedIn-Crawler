@@ -11,35 +11,35 @@ const loginToLinkedInFakeAccount = async () => {
     });          //! when running puppeteer in heroku/AWS or similar, headless shoud be set tp true
     const page = await browser.newPage();
     await page.goto("https://www.linkedin.com/uas/login")
-    await page.type('#username', 'jebigom876@idrct.com');
+    await page.type('#username', 'sitedo7204@idrct.com');
     await page.type('#password', 'asdfg12345');
     await page.waitForSelector('.btn__primary--large');
     await page.click('.btn__primary--large');
     await page.waitFor(15000);
 
-    // const resultsFromLinkedIn = await linkedInSearchProfiles(page, 2);
-    // console.log('From Shadi Function=', resultsFromLinkedIn);
-    // const resultsFromGoogle = await googleSearchProfiles(page, 3)
-    // console.log('From Saleh Function=', resultsFromGoogle);
+    const resultsFromLinkedIn = await linkedInSearchProfiles(page, 2);
+    console.log('From Shadi Function=', resultsFromLinkedIn);
+    const resultsFromGoogle = await googleSearchProfiles(page, 3)
+    console.log('From Saleh Function=', resultsFromGoogle);
 
-    // for(const profileLink of resultsFromGoogle){
-    //     console.log(`Crawling Link=${profileLink}`);
-    //     const dataResultObj = await GetDataFromSpecificProfile(browser, page, profileLink);
-    //     console.log('dataResultObj=',dataResultObj);
-    // }
-        // console.log(`Crawling Link=${resultsFromGoogle[0]}`);
-        const dataResultObj = await GetDataFromSpecificProfile(browser, page, `https://il.linkedin.com/in/isaac-goldenberg-58b9b6a3`);
+    for(const profileLink of resultsFromGoogle){
+        console.log(`Crawling Link=${profileLink}`);
+        const dataResultObj = await GetDataFromSpecificProfile(browser, page, profileLink);
         console.log('dataResultObj=',dataResultObj);
-    // resultsFromGoogle.forEach(async (profileLink,index) => {
-    //     console.log(`Crawling Link=${profileLink} with index=${index}`);
-    //     const dataResultObj = await GetDataFromSpecificProfile(page, profileLink);
-    //     console.log('dataResultObj=',dataResultObj);
-    // })
+    }
+        // console.log(`Crawling Link=${resultsFromGoogle[0]}`);
+        // const dataResultObj = await GetDataFromSpecificProfile(browser, page, `https://il.linkedin.com/in/isaac-goldenberg-58b9b6a3`);
+        // console.log('dataResultObj=',dataResultObj);
+    resultsFromGoogle.forEach(async (profileLink,index) => {
+        console.log(`Crawling Link=${profileLink} with index=${index}`);
+        const dataResultObj = await GetDataFromSpecificProfile(page, profileLink);
+        console.log('dataResultObj=',dataResultObj);
+    })
 
-    // resultsFromLinkedIn.forEach(async (profileLink) => {
-    //     // console.log(`i'm here shadi`);
-    //     // const dataResultObj = await GetDataFromSpecificProfile(profileLink);
-    // })
+    resultsFromLinkedIn.forEach(async (profileLink) => {
+        // console.log(`i'm here shadi`);
+        // const dataResultObj = await GetDataFromSpecificProfile(profileLink);
+    })
 }
 
 const GetDataFromSpecificProfile = async (browser, page, profile) => {
@@ -48,16 +48,15 @@ const GetDataFromSpecificProfile = async (browser, page, profile) => {
     await page.waitForSelector('.pb2.pv-text-details__left-panel a.link-without-visited-state')
     await page.click('.pb2.pv-text-details__left-panel a.link-without-visited-state')
 
-
     const puppeteerData = await page.evaluate(() => {
         const personName = document.querySelector('.text-heading-xlarge').innerText.trim();
         const location = document.querySelector('.pb2.pv-text-details__left-panel .text-body-small').innerText.trim();
-        const text = document.querySelector('.pv-contact-info__ci-container a').innerText; //THIS SHIT DOESNT WORK, ASK FOR HELP
+        // const text = document.querySelector('.pv-contact-info__ci-container a').innerText; //THIS SHIT DOESNT WORK, ASK FOR HELP
         return {
             name: personName || '',
             location: location || '',
             // email: email || 'no-public-email-available',
-            profileLink: text || '',
+            // profileLink: text || '',
         };
     })
 

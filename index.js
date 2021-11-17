@@ -22,27 +22,29 @@ const loginToLinkedInFakeAccount = async () => {
     const resultsFromGoogle = await googleSearchProfiles(page, 3)
     console.log('From Saleh Function=', resultsFromGoogle);
 
+    let arrayOfResult = [];
     for(const profileLink of resultsFromGoogle){
         console.log(`Crawling Link=${profileLink}`);
-        const dataResultObj = await GetDataFromSpecificProfile(browser, page, profileLink);
-        console.log('dataResultObj=',dataResultObj);
-    }
-        // console.log(`Crawling Link=${resultsFromGoogle[0]}`);
-        // const dataResultObj = await GetDataFromSpecificProfile(browser, page, `https://il.linkedin.com/in/isaac-goldenberg-58b9b6a3`);
-        // console.log('dataResultObj=',dataResultObj);
-    resultsFromGoogle.forEach(async (profileLink,index) => {
-        console.log(`Crawling Link=${profileLink} with index=${index}`);
         const dataResultObj = await GetDataFromSpecificProfile(page, profileLink);
         console.log('dataResultObj=',dataResultObj);
-    })
+        arrayOfResult.push(dataResultObj);
+    }
+    // resultsFromGoogle.forEach(async (profileLink,index) => {
+    //     console.log(`Crawling Link=${profileLink} with index=${index}`);
+    //     const dataResultObj = await GetDataFromSpecificProfile(page, profileLink);
+    //     console.log('dataResultObj=',dataResultObj);
+    // })
 
     resultsFromLinkedIn.forEach(async (profileLink) => {
-        // console.log(`i'm here shadi`);
-        // const dataResultObj = await GetDataFromSpecificProfile(profileLink);
+        console.log(`Crawling Link=${profileLink}`);
+        const dataResultObj = await GetDataFromSpecificProfile(profileLink);
+        console.log('dataResultObj=',dataResultObj);
+        arrayOfResult.push(dataResultObj);
     })
+    //Save arrayOfResults to the DB using InsertMany (could be a function, could be in this code)
 }
 
-const GetDataFromSpecificProfile = async (browser, page, profile) => {
+const GetDataFromSpecificProfile = async (page, profile) => {
     await page.goto(`${profile}`, { waitUntil: 'networkidle2' });
     //get all page html so we can scrape it using cheerio
     await page.waitForSelector('.pb2.pv-text-details__left-panel a.link-without-visited-state')
@@ -51,16 +53,14 @@ const GetDataFromSpecificProfile = async (browser, page, profile) => {
     const puppeteerData = await page.evaluate(() => {
         const personName = document.querySelector('.text-heading-xlarge').innerText.trim();
         const location = document.querySelector('.pb2.pv-text-details__left-panel .text-body-small').innerText.trim();
-        // const text = document.querySelector('.pv-contact-info__ci-container a').innerText; //THIS SHIT DOESNT WORK, ASK FOR HELP
+        // const email = document.querySelector('.pv-contact-info__ci-container a').innerText; //THIS SHIT DOESNT WORK, ASK FOR HELP
         return {
-            name: personName || '',
-            location: location || '',
+            name: personName || 'name-not-found',
+            location: location || 'location-not-found',
             // email: email || 'no-public-email-available',
-            // profileLink: text || '',
+            profileLink: profile,
         };
     })
-
-    // await browser.close();
     return puppeteerData;
 }
 

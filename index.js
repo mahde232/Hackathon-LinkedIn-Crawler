@@ -1,7 +1,8 @@
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 const fs = require('fs');
-
+const mongoose = require('mongoose');
+const profileModel = require('./models/profiles.model').profilesModel;
 //puppeteer params
 const loginToLinkedInFakeAccount = async () => {
     const browser = await puppeteer.launch({
@@ -120,3 +121,7 @@ const googleSearchProfiles = async (page, howManyPages) => {
 
 
 loginToLinkedInFakeAccount();
+
+mongoose.connect('mongodb+srv://mahde:asdfg12345@cluster0.tdz2o.mongodb.net/LinkedInDB?retryWrites=true&w=majority', { useNewUrlParser: true },()=>{
+    console.log('connected to db');
+});
